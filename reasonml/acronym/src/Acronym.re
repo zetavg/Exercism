@@ -1,8 +1,7 @@
 let re = [%re "/[ -]/"];
 
-let abbreviate = s =>
-  s
+let abbreviate = string =>
+  string
   |> Js.String.splitByRe(re)
-  |> Array.map(Js.String.charAt(0))
-  |> Array.map(Js.String.toUpperCase)
+  |> Array.map(s => s |> Js.String.charAt(0) |> Js.String.toUpperCase)
   |> Js.Array.joinWith("");
