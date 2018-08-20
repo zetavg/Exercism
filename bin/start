@@ -137,4 +137,5 @@ fi
 # Push changes
 git push --set-upstream origin "$exercise_full_name"
 
+echo ""
 echo "Now start your exercise at $(pwd)!"
