@@ -1,0 +1,136 @@
+#!/bin/bash
+# -------------------------------------------------------------------
+# start
+# -------------------------------------------------------------------
+
+SUBJECT=start
+VERSION=0.0.1
+USAGE="start --exercise=<exercise> --track=<track>"
+HELP="
+$USAGE
+
+    Start an Exercism exercise.
+
+    This will automatically download the exercise and make an inital
+    commit if the exercise dosen't exists. Also this will prepare and
+    switch to a branch for that exercise.
+
+    Required options:
+
+    --exercise  the exercise slug.
+
+    --track     the track ID.
+
+    The following options are available:
+
+    -h      Show this message.
+"
+
+# --- Options -------------------------------------------------------
+
+exercise=''
+track=''
+
+# --- Option Processing ---------------------------------------------
+
+# Transform long options to short ones
+for arg in "$@"; do
+  shift
+  case "$arg" in
+    "--help")                set -- "$@" "-h" ;;
+    "--exercise")            set -- "$@" "-e" ;;
+    "--track")               set -- "$@" "-t" ;;
+    "--exercise="* | "-e="*) set -- "$@" "-e${arg#*=}" ;;
+    "--track="*    | "-t="*) set -- "$@" "-t${arg#*=}" ;;
+    *)                       set -- "$@" "$arg"
+  esac
+done
+
+while getopts ":vhe:t:" optname
+  do
+    case "$optname" in
+      "v")
+        echo "$SUBJECT version $VERSION"
+        exit 0;
+        ;;
+      "h")
+        echo "$HELP"
+        exit 0;
+        ;;
+      "?")
+        echo "Unknown option: -$OPTARG" >&2
+        echo "Usage: $USAGE"
+        exit 1;
+        ;;
+      ":")
+        echo "No argument value for option $OPTARG" >&2
+        echo "Usage: $USAGE"
+        exit 1;
+        ;;
+
+      "e")
+        exercise="$OPTARG"
+        ;;
+
+      "t")
+        track="$OPTARG"
+        ;;
+    esac
+  done
+
+shift $(($OPTIND - 1))
+
+# --- Options Checking & Overriding ---------------------------------
+
+if [ -z "$exercise" ]; then
+  echo "Missing required option: --exercise" >&2
+  echo "Usage: $USAGE"
+  exit 1;
+fi
+
+if [ -z "$track" ]; then
+  echo "Missing required option: --track" >&2
+  echo "Usage: $USAGE"
+  exit 1;
+fi
+
+# --- Script Body ---------------------------------------------------
+
+set -e
+
+# Switch to the project directory
+cd "$(dirname "$0")/.."
+exercise_full_name="$track/$exercise"
+
+# Check Git status
+if ! [ -z "$(git status --porcelain)" ]; then
+  echo "Git working directory not clean!" >&2
+  echo "Please commit or stash your changes before starting an exercise."
+  exit 1;
+fi
+
+# Prepare Git branch
+if [ -n "$(git show-ref "refs/heads/$exercise_full_name")" ]; then
+  git checkout "$exercise_full_name"
+else
+  git checkout -b "$exercise_full_name"
+fi
+
+# Prepare the exercise
+if [ -d "$exercise_full_name" ]; then
+  cd "$exercise_full_name"
+  echo "Exercise already downloaded at $(pwd)"
+else
+  echo "Downloading $exercise_full_name..."
+  exercism download --exercise="$exercise" --track="$track"
+  cd "$exercise_full_name"
+fi
+
+# Commit new download if needed
+if ! [ -z "$(git status --porcelain)" ]; then
+  git add .
+  git commit -m "$track: download $exercise"
+  git push --set-upstream origin "$exercise_full_name"
+fi
+
+echo "Now start your exercise at $(pwd)!"
