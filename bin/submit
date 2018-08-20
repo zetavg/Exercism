@@ -9,21 +9,19 @@ USAGE="submit --exercise=<exercise> --track=<track>"
 HELP="
 $USAGE
 
-    Submit an Exercism exercise.
+    Submit an Exercism exercise base on the current branch.
 
     This will submit the solution to Exercism, perform a commit if
     there's any changes, push the changes and switch the branch back
     to master.
 
-    Required options:
-
-    --exercise  the exercise slug.
-
-    --track     the track ID.
-
     The following options are available:
 
-    -h      Show this message.
+    --exercise  Override the exercise slug.
+
+    --track     Override the track ID.
+
+    -h          Show this message.
 "
 
 # --- Options -------------------------------------------------------
@@ -82,6 +80,19 @@ shift $(($OPTIND - 1))
 
 # --- Options Checking & Overriding ---------------------------------
 
+current_branch="$(git rev-parse --abbrev-ref HEAD)"
+echo $current_branch
+
+if [[ $current_branch = *"/"* ]]; then
+  if [ -z "$exercise" ]; then
+    exercise="$(echo "$current_branch" | sed 's/^.*\///g')"
+  fi
+
+  if [ -z "$track" ]; then
+    track="$(echo "$current_branch" | sed 's/\/.*$//g')"
+  fi
+fi
+
 if [ -z "$exercise" ]; then
   echo "Missing required option: --exercise" >&2
   echo "Usage: $USAGE"
@@ -101,6 +112,12 @@ set -e
 # Switch to the project directory
 cd "$(dirname "$0")/.."
 exercise_full_name="$track/$exercise"
+
+# Check exercise
+if ! [ -d "$exercise_full_name" ]; then
+  echo "Exercise $exercise_full_name doesn't exists!"
+  exit 1
+fi
 
 # Prepare Git branch
 git checkout "$exercise_full_name"

@@ -5,7 +5,7 @@
 
 SUBJECT=start
 VERSION=0.0.1
-USAGE="start --exercise=<exercise> --track=<track>"
+USAGE="start [--exercise=<exercise>] [--track=<track>] <track/exercise>"
 HELP="
 $USAGE
 
@@ -15,15 +15,15 @@ $USAGE
     commit if the exercise dosen't exists. Also this will prepare and
     switch to a branch for that exercise.
 
-    Required options:
-
-    --exercise  the exercise slug.
-
-    --track     the track ID.
-
     The following options are available:
 
-    -h      Show this message.
+    --exercise  The exercise slug. This will be required if you
+                didn't specify <track/exercise>.
+
+    --track     The track ID. This will be required if you didn't
+                specify <track/exercise>.
+
+    -h          Show this message.
 "
 
 # --- Options -------------------------------------------------------
@@ -81,6 +81,16 @@ while getopts ":vhe:t:" optname
 shift $(($OPTIND - 1))
 
 # --- Options Checking & Overriding ---------------------------------
+
+if [[ $1 = *"/"* ]]; then
+  if [ -z "$exercise" ]; then
+    exercise="$(echo "$1" | sed 's/^.*\///g')"
+  fi
+
+  if [ -z "$track" ]; then
+    track="$(echo "$1" | sed 's/\/.*$//g')"
+  fi
+fi
 
 if [ -z "$exercise" ]; then
   echo "Missing required option: --exercise" >&2
