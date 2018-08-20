@@ -109,6 +109,13 @@ if ! [ -z "$(git status --porcelain)" ]; then
   exit 1;
 fi
 
+# Prepare Git branch
+if [ -n "$(git show-ref "refs/heads/$exercise_full_name")" ]; then
+  git checkout "$exercise_full_name"
+else
+  git checkout -b "$exercise_full_name"
+fi
+
 # Prepare the exercise
 if [ -d "$exercise_full_name" ]; then
   cd "$exercise_full_name"
@@ -119,12 +126,11 @@ else
   cd "$exercise_full_name"
 fi
 
-# Prepare Git branch
-git checkout -B "$exercise_full_name"
-
 # Commit new download if needed
 if ! [ -z "$(git status --porcelain)" ]; then
+  git add .
   git commit -m "$track: download $exercise"
+  git push --set-upstream origin "$exercise_full_name"
 fi
 
-git push --set-upstream origin "$exercise_full_name"
+echo "Now start your exercise at $(pwd)!"
