@@ -8,17 +8,9 @@ data Allergen = Eggs
               | Chocolate
               | Pollen
               | Cats
-              deriving (Eq, Show)
+              deriving (Eq, Show, Bounded, Enum)
 
-listOfAllAllergies =
-  [ Eggs
-  , Peanuts
-  , Shellfish
-  , Strawberries
-  , Tomatoes
-  , Chocolate
-  , Pollen
-  , Cats ]
+listOfAllAllergies = [(minBound :: Allergen)..(maxBound :: Allergen)]
 
 bits :: Int -> [Bool]
 bits number
