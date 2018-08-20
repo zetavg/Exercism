@@ -31,8 +31,7 @@ allergiesOfBits :: [Bool] -> [Allergen]
 allergiesOfBits =
   map (\(Just a) -> a)
     . filter (/= Nothing)
-    . map (\(a, b) -> if b then Just a else Nothing)
-    . zip listOfAllAllergies
+    . zipWith (\a b -> if b then Just a else Nothing) listOfAllAllergies
 
 allergies :: Int -> [Allergen]
 allergies = allergiesOfBits . bits
