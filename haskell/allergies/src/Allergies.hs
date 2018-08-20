@@ -27,11 +27,14 @@ bits number
   | mod == 0 = False : bits div
   where (div, mod) = number `divMod` 2
 
+maskBy :: [a] -> [Bool] -> [a]
+[] `maskBy` _ = []
+_ `maskBy` [] = []
+(x:xs) `maskBy` (b:bs) = if b then x:maskedTail else maskedTail
+  where maskedTail = xs `maskBy` bs
+
 allergiesOfBits :: [Bool] -> [Allergen]
-allergiesOfBits =
-  map (\(Just a) -> a)
-    . filter (/= Nothing)
-    . zipWith (\a b -> if b then Just a else Nothing) listOfAllAllergies
+allergiesOfBits = (listOfAllAllergies `maskBy`)
 
 allergies :: Int -> [Allergen]
 allergies = allergiesOfBits . bits
