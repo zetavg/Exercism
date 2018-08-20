@@ -124,8 +124,12 @@ echo "Submitting $exercise_full_name..."
 echo
 echo "Files: "
 for file in "$exercise_full_name/src/"*; do
-  echo "  $file"
-  files="$files $file"
+  case "$file" in
+    *.bs.js) ;; # Ignore compiled ReasonML files
+    *)
+      echo "  $file"
+      files="$files $file"
+  esac
 done
 echo
 printf '.'
