@@ -112,7 +112,9 @@ fi
 # Prepare Git branch
 if [ -n "$(git show-ref "refs/heads/$exercise_full_name")" ]; then
   git checkout "$exercise_full_name"
+  git merge master
 else
+  git checkout master
   git checkout -b "$exercise_full_name"
 fi
 
@@ -130,7 +132,9 @@ fi
 if ! [ -z "$(git status --porcelain)" ]; then
   git add .
   git commit -m "$track: download $exercise"
-  git push --set-upstream origin "$exercise_full_name"
 fi
+
+# Push changes
+git push --set-upstream origin "$exercise_full_name"
 
 echo "Now start your exercise at $(pwd)!"
