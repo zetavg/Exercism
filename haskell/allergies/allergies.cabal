@@ -1,0 +1,34 @@
+-- This file has been generated from package.yaml by hpack version 0.28.2.
+--
+-- see: https://github.com/sol/hpack
+--
+-- hash: 3fe5759c9b210f0bb312fdfcb69915a1a8d85079b31f828127d783ae6dcc5220
+
+name:           allergies
+version:        1.2.0.5
+build-type:     Simple
+cabal-version:  >= 1.10
+
+library
+  exposed-modules:
+      Allergies
+  other-modules:
+      Paths_allergies
+  hs-source-dirs:
+      src
+  build-depends:
+      base
+  default-language: Haskell2010
+
+test-suite test
+  type: exitcode-stdio-1.0
+  main-is: Tests.hs
+  other-modules:
+      Paths_allergies
+  hs-source-dirs:
+      test
+  build-depends:
+      allergies
+    , base
+    , hspec
+  default-language: Haskell2010
