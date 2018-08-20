@@ -1,0 +1,142 @@
+#!/bin/bash
+# -------------------------------------------------------------------
+# submit
+# -------------------------------------------------------------------
+
+SUBJECT=submit
+VERSION=0.0.1
+USAGE="submit --exercise=<exercise> --track=<track>"
+HELP="
+$USAGE
+
+    Submit an Exercism exercise.
+
+    This will submit the solution to Exercism, perform a commit if
+    there's any changes, push the changes and switch the branch back
+    to master.
+
+    Required options:
+
+    --exercise  the exercise slug.
+
+    --track     the track ID.
+
+    The following options are available:
+
+    -h      Show this message.
+"
+
+# --- Options -------------------------------------------------------
+
+exercise=''
+track=''
+
+# --- Option Processing ---------------------------------------------
+
+# Transform long options to short ones
+for arg in "$@"; do
+  shift
+  case "$arg" in
+    "--help")                set -- "$@" "-h" ;;
+    "--exercise")            set -- "$@" "-e" ;;
+    "--track")               set -- "$@" "-t" ;;
+    "--exercise="* | "-e="*) set -- "$@" "-e${arg#*=}" ;;
+    "--track="*    | "-t="*) set -- "$@" "-t${arg#*=}" ;;
+    *)                       set -- "$@" "$arg"
+  esac
+done
+
+while getopts ":vhe:t:" optname
+  do
+    case "$optname" in
+      "v")
+        echo "$SUBJECT version $VERSION"
+        exit 0;
+        ;;
+      "h")
+        echo "$HELP"
+        exit 0;
+        ;;
+      "?")
+        echo "Unknown option: -$OPTARG" >&2
+        echo "Usage: $USAGE"
+        exit 1;
+        ;;
+      ":")
+        echo "No argument value for option $OPTARG" >&2
+        echo "Usage: $USAGE"
+        exit 1;
+        ;;
+
+      "e")
+        exercise="$OPTARG"
+        ;;
+
+      "t")
+        track="$OPTARG"
+        ;;
+    esac
+  done
+
+shift $(($OPTIND - 1))
+
+# --- Options Checking & Overriding ---------------------------------
+
+if [ -z "$exercise" ]; then
+  echo "Missing required option: --exercise" >&2
+  echo "Usage: $USAGE"
+  exit 1;
+fi
+
+if [ -z "$track" ]; then
+  echo "Missing required option: --track" >&2
+  echo "Usage: $USAGE"
+  exit 1;
+fi
+
+# --- Script Body ---------------------------------------------------
+
+set -e
+
+# Switch to the project directory
+cd "$(dirname "$0")/.."
+exercise_full_name="$track/$exercise"
+
+# Prepare Git branch
+git checkout "$exercise_full_name"
+
+# Commit changes if needed
+if ! [ -z "$(git status --porcelain)" ]; then
+  git add "$exercise_full_name"
+  git commit -m "$track: submit $exercise"
+fi
+
+# Push changes
+git merge master
+git push --set-upstream origin "$exercise_full_name"
+git checkout master
+git merge "$exercise_full_name"
+git push --set-upstream origin master
+
+# Submit the solution
+echo
+echo "Submitting $exercise_full_name..."
+echo
+echo "Files: "
+for file in "$exercise_full_name/src/"*; do
+  echo "  $file"
+  files="$files $file"
+done
+echo
+printf '.'
+sleep 1
+printf '.'
+sleep 1
+printf '.'
+sleep 1
+printf '.'
+sleep 1
+printf '.'
+sleep 1
+echo
+exercism submit $files
