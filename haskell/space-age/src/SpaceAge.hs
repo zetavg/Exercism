@@ -10,11 +10,14 @@ data Planet = Mercury
             | Neptune
 
 ageOn :: Planet -> Float -> Float
-ageOn Mercury seconds = seconds / (31557600.0 * 0.2408467)
-ageOn Venus   seconds = seconds / (31557600.0 * 0.61519726)
-ageOn Earth   seconds = seconds / (31557600.0 * 1.0)
-ageOn Mars    seconds = seconds / (31557600.0 * 1.8808158)
-ageOn Jupiter seconds = seconds / (31557600.0 * 11.862615)
-ageOn Saturn  seconds = seconds / (31557600.0 * 29.447498)
-ageOn Uranus  seconds = seconds / (31557600.0 * 84.016846)
-ageOn Neptune seconds = seconds / (31557600.0 * 164.79132)
+ageOn Mercury seconds = yearsOfSecondsOnEarth seconds / 0.2408467
+ageOn Venus   seconds = yearsOfSecondsOnEarth seconds / 0.61519726
+ageOn Earth   seconds = yearsOfSecondsOnEarth seconds
+ageOn Mars    seconds = yearsOfSecondsOnEarth seconds / 1.8808158
+ageOn Jupiter seconds = yearsOfSecondsOnEarth seconds / 11.862615
+ageOn Saturn  seconds = yearsOfSecondsOnEarth seconds / 29.447498
+ageOn Uranus  seconds = yearsOfSecondsOnEarth seconds / 84.016846
+ageOn Neptune seconds = yearsOfSecondsOnEarth seconds / 164.79132
+
+yearsOfSecondsOnEarth :: Float -> Float
+yearsOfSecondsOnEarth seconds = seconds / 31557600.0
